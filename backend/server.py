@@ -55,8 +55,12 @@ def validate_state(value):
         raise ValueError('Слишком много записей')
     ids = set()
     for m in meds:
-        if not isinstance(m, dict) or set(m) != {'id','name','dose','start','end','days','times','note'}:
+        if not isinstance(m, dict) or set(m) - {'cycle'} != {'id','name','dose','start','end','days','times','note'}:
             raise ValueError('Некорректное лекарство')
+        if 'cycle' in m:
+            cycle = m['cycle']
+            if not isinstance(cycle, dict) or set(cycle) != {'on','off'} or any(type(n) is not int or not 1 <= n <= 365 for n in cycle.values()):
+                raise ValueError('Дни приёма и перерыва: целые числа от 1 до 365')
         if not isinstance(m['id'], str) or not re.fullmatch(r'[a-zA-Z0-9-]{1,80}', m['id']) or m['id'] in ids:
             raise ValueError('Некорректный идентификатор')
         ids.add(m['id'])

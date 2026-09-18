@@ -110,7 +110,12 @@ def due(state,zone,created,now):
     local=dt.datetime.fromtimestamp(now,ZoneInfo(zone))
     date=local.date().isoformat()
     for med in state['meds']:
-        if med['start']>date or (med['end'] and med['end']<date) or (local.weekday()+1)%7 not in med['days']:continue
+        if med['start']>date or (med['end'] and med['end']<date):continue
+        if 'cycle' in med:
+            cycle=med['cycle']
+            elapsed=(local.date()-dt.date.fromisoformat(med['start'])).days
+            if elapsed % (cycle['on']+cycle['off']) >= cycle['on']:continue
+        elif (local.weekday()+1)%7 not in med['days']:continue
         for clock in med['times']:
             hour,minute=map(int,clock.split(':'))
             scheduled=local.replace(hour=hour,minute=minute,second=0,microsecond=0).timestamp()

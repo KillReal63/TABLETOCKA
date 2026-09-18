@@ -17,6 +17,7 @@ class Integration(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             os.environ['DATA_DIR']=directory
             import server
+            importlib.reload(server.push_system)
             importlib.reload(server)
             server.initialize()
             http=server.ThreadingHTTPServer(('127.0.0.1',0),server.API)
@@ -49,6 +50,9 @@ class Integration(unittest.TestCase):
                 self.assertEqual(request('state',{'state':data,'version':0})[0],409)
                 invalid=copy.deepcopy(data);invalid['meds'][0]['times']=['99:99']
                 self.assertEqual(request('state',{'state':invalid,'version':1})[0],400)
+                self.assertEqual(request('state')[1]['state'],data)
+                data['meds'][0]['cycle']={'on':2,'off':3}
+                self.assertEqual(request('state',{'state':data,'version':1})[0],200)
                 self.assertEqual(request('state')[1]['state'],data)
                 server.initialize()
                 self.assertEqual(request('state')[1]['state'],data)
