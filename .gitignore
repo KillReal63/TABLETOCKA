@@ -1,0 +1,12 @@
+*.sqlite3
+*.sqlite3-*
+__pycache__/
+setup-token
+.env
+*.pem
+*.key
+
+design-reference/
+index-before-focus.html
+app-before-focus.js
+build-focus.cjs
