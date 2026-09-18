@@ -55,8 +55,10 @@ def validate_state(value):
         raise ValueError('Слишком много записей')
     ids = set()
     for m in meds:
-        if not isinstance(m, dict) or set(m) - {'cycle'} != {'id','name','dose','start','end','days','times','note'}:
+        if not isinstance(m, dict) or set(m) - {'cycle','category'} != {'id','name','dose','start','end','days','times','note'}:
             raise ValueError('Некорректное лекарство')
+        if 'category' in m and (not isinstance(m['category'], str) or m['category'] not in ('pill','ointment','supplement','action')):
+            raise ValueError('Некорректная категория')
         if 'cycle' in m:
             cycle = m['cycle']
             if not isinstance(cycle, dict) or set(cycle) != {'on','off'} or any(type(n) is not int or not 1 <= n <= 365 for n in cycle.values()):
@@ -65,7 +67,8 @@ def validate_state(value):
             raise ValueError('Некорректный идентификатор')
         ids.add(m['id'])
         for field, limit in [('name',80),('dose',80),('note',160)]:
-            if not isinstance(m[field],str) or len(m[field])>limit or (field!='note' and not m[field].strip()):
+            required = field == 'name' or (field == 'dose' and m.get('category') != 'action')
+            if not isinstance(m[field],str) or len(m[field])>limit or (required and not m[field].strip()):
                 raise ValueError('Проверь название и дозировку')
         valid_date(m['start'])
         if m['end'] != '':

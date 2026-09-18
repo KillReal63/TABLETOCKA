@@ -54,6 +54,15 @@ class Integration(unittest.TestCase):
                 data['meds'][0]['cycle']={'on':2,'off':3}
                 self.assertEqual(request('state',{'state':data,'version':1})[0],200)
                 self.assertEqual(request('state')[1]['state'],data)
+                for category in ['pill','ointment','supplement','action']:
+                    data['meds'][0]['category']=category
+                    data['meds'][0]['dose']='' if category=='action' else '1'
+                    version=request('state')[1]['version']
+                    self.assertEqual(request('state',{'state':data,'version':version})[0],200)
+                    self.assertEqual(request('state')[1]['state'],data)
+                for category in ['unknown', None, [], 1]:
+                    invalid=copy.deepcopy(data);invalid['meds'][0]['category']=category
+                    self.assertEqual(request('state',{'state':invalid,'version':request('state')[1]['version']})[0],400)
                 server.initialize()
                 self.assertEqual(request('state')[1]['state'],data)
                 subprocess.run([sys.executable,str(Path(__file__).with_name('backup.py'))],check=True)
