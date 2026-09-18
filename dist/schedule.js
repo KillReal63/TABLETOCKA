@@ -8,4 +8,5 @@ function scheduledOn(med, date) {
   }
   return med.days.includes(day.getUTCDay());
 }
-if (typeof module !== 'undefined') module.exports = {scheduledOn};
+function courseEnd(start, days) { const date=new Date(start+'T00:00:00Z');date.setUTCDate(date.getUTCDate()+days-1);return date.toISOString().slice(0,10); }
+if (typeof module !== 'undefined') module.exports = {scheduledOn,courseEnd};

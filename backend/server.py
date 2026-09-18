@@ -55,8 +55,10 @@ def validate_state(value):
         raise ValueError('Слишком много записей')
     ids = set()
     for m in meds:
-        if not isinstance(m, dict) or set(m) - {'cycle','category'} != {'id','name','dose','start','end','days','times','note'}:
+        if not isinstance(m, dict) or set(m) - {'cycle','category','meal','durationDays'} != {'id','name','dose','start','end','days','times','note'}:
             raise ValueError('Некорректное лекарство')
+        if 'meal' in m and (not isinstance(m['meal'], str) or m['meal'] not in ('before','after','any')):
+            raise ValueError('Некорректное отношение к еде')
         if 'category' in m and (not isinstance(m['category'], str) or m['category'] not in ('pill','ointment','supplement','action')):
             raise ValueError('Некорректная категория')
         if 'cycle' in m:
@@ -71,6 +73,12 @@ def validate_state(value):
             if not isinstance(m[field],str) or len(m[field])>limit or (required and not m[field].strip()):
                 raise ValueError('Проверь название и дозировку')
         valid_date(m['start'])
+        if 'durationDays' in m:
+            n=m['durationDays']
+            if type(n) is not int or not 1 <= n <= 3650 or 'cycle' in m:
+                raise ValueError('Некорректная длительность курса')
+            if m['end'] != (dt.date.fromisoformat(m['start'])+dt.timedelta(days=n-1)).isoformat() or sorted(m['days']) != list(range(7)):
+                raise ValueError('Курс N дней должен быть ежедневным с корректной датой окончания')
         if m['end'] != '':
             valid_date(m['end'])
             if m['end']<m['start']: raise ValueError('Конец курса раньше начала')
