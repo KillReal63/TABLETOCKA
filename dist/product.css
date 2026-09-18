@@ -9,3 +9,27 @@ html{background:#e6eef4}html[data-theme=plum]{background:#201823}html[data-theme
 #focus-styles .category-icon{width:28px;height:28px;flex:none;color:var(--accent);vertical-align:middle}
 #focus-styles .dose h3 .category-icon{width:22px;height:22px;margin-right:6px}
 #focus-styles .focus .md-focus-object .category-icon{width:94px;height:94px;filter:drop-shadow(0 8px 12px #0002);fill:var(--soft)}
+
+/* Small sculpted objects share the palette of the original capsule. */
+#focus-styles .category-art{display:inline-grid;place-items:center;position:relative;width:28px;height:32px;flex:none;vertical-align:middle;color:var(--accent)}
+#focus-styles .category-art .md-pill{width:13px;height:27px}
+#focus-styles .focus .md-focus-object .category-art{width:94px;height:110px}
+#focus-styles .ointment-tube{position:absolute;top:3%;left:26%;width:48%;height:75%;border:1px solid #ffffffb3;border-radius:3px 3px 28% 28%;background:linear-gradient(100deg,#fff9,#ffffff22 35%,#0001 80%,#fff5),linear-gradient(170deg,color-mix(in srgb,var(--accent) 25%,white),var(--accent));box-shadow:inset 2px 0 3px #fff8,5px 8px 10px #0002;overflow:hidden}
+#focus-styles .art-ointment{transform:rotate(-18deg)}
+#focus-styles .ointment-tube:before{content:'';position:absolute;top:5%;left:0;right:0;height:6%;border-top:1px solid #ffffffb3;border-bottom:1px solid #0002}
+#focus-styles .tube-band{position:absolute;left:0;right:0;top:38%;height:33%;display:grid;place-items:center;background:var(--soft);color:var(--ink);font-size:14px;font-weight:500}
+#focus-styles .tube-cap{position:absolute;left:34%;top:77%;width:32%;height:18%;border:1px solid #fff6;border-radius:1px 1px 4px 4px;background:repeating-linear-gradient(90deg,#ffffff22 0 2px,#0001 2px 3px),linear-gradient(90deg,var(--accent),#e6eeef,var(--accent));box-shadow:3px 5px 6px #0002}
+#focus-styles .focus .md-focus-object .tube-band{font-size:32px}
+#focus-styles .action-sheet{position:absolute;inset:8% 12%;border:1px solid #fff9;border-radius:18%;background:linear-gradient(125deg,#fff9,#fff1 65%),linear-gradient(160deg,color-mix(in srgb,var(--accent) 30%,white),var(--accent));box-shadow:inset 1px 1px 2px white,5px 8px 12px #0002;transform:rotate(9deg);display:grid;place-items:center;color:color-mix(in srgb,var(--accent) 45%,#183731)}
+#focus-styles .action-sheet:before{content:'';position:absolute;width:36%;height:7%;top:9%;border-radius:9px;background:#fff8;box-shadow:0 1px 1px #0002}
+#focus-styles .action-sheet svg{width:80%;height:80%}
+#focus-styles .sheet-line{position:absolute;bottom:15%;left:28%;width:44%;height:3%;background:currentColor;opacity:.35;border-radius:3px}
+#focus-styles .dose h3 .category-art{width:22px;height:24px;margin-right:6px}
+#focus-styles #summary{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
+#focus-styles .progress-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:58px;min-height:74px;padding:9px 10px 7px;border:1px solid var(--line);border-radius:17px;background:var(--soft);color:var(--ink)}
+#focus-styles .progress-item .category-art{height:32px}
+#focus-styles .progress-item.is-done{border-color:var(--accent)}
+#focus-styles .progress-item.is-done>.category-art,#focus-styles .progress-item.is-done>.category-icon{opacity:.5}
+#focus-styles .progress-time{font-size:11px;font-variant-numeric:tabular-nums;color:var(--muted)}
+#focus-styles .progress-check{position:absolute;right:4px;top:3px;background:var(--accent);color:var(--paper);width:16px;height:16px;display:grid;place-items:center;border-radius:50%;font-size:11px;font-weight:700}
+#focus-styles .md-nav .nav-icon{display:block;width:25px;height:25px;margin:0 auto 3px;flex:none}

@@ -11,7 +11,13 @@ const categoryShapes={
  supplement:'<rect x="24" y="6" width="16" height="9" rx="2"/><rect x="18" y="15" width="28" height="42" rx="9"/><path d="M19 26h26M19 47h26M27 40c0-7 5-10 11-10 0 7-4 11-11 10ZM27 40l7-6"/>',
  action:'<rect x="14" y="10" width="36" height="46" rx="7"/><path d="M25 10V7h14v3M23 32l6 6 13-14M24 46h16"/>'
 };
-function categoryIcon(m){return `<svg class="category-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${categoryShapes[m?.category||'pill']||categoryShapes.pill}</svg>`}
+function categoryIcon(m){
+ const category=m?.category||'pill';
+ if(category==='pill')return '<span class="category-art art-pill" aria-hidden="true"><span class="md-pill gold"></span></span>';
+ if(category==='ointment')return '<span class="category-art art-ointment" aria-hidden="true"><span class="ointment-tube"><span class="tube-band">+</span></span><span class="tube-cap"></span></span>';
+ if(category==='action')return '<span class="category-art art-action" aria-hidden="true"><span class="action-sheet"><svg viewBox="0 0 40 40" fill="none"><path d="m10 20 7 7 14-15" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sheet-line"></span></span></span>';
+ return `<svg class="category-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${categoryShapes.supplement}</svg>`;
+}
 const completedLabel=m=>m.category==='action'?'Выполнено':m.category==='ointment'?'Нанесено':'Принято';
 const details=m=>[categoryLabel(m),m.dose,m.note].filter(Boolean).map(esc).join(' · ');
 const weekdays=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
