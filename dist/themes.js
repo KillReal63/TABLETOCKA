@@ -1,6 +1,6 @@
 (function(){
  const names={glass:'Стекло',tide:'Прилив',plum:'Слива',dawn:'Рассвет',coal:'Уголь'};
- const colors={glass:'#e6eef4',tide:'#102c37',plum:'#201823',dawn:'#fcf5e9',coal:'#282623'};
+ const colors={glass:'#e6eef4',tide:'#244777',plum:'#554568',dawn:'#fae9cf',coal:'#282623'};
  const key='vovremya-theme-mode';
  function themeAt(hour){return hour>=6&&hour<14?'glass':hour>=14&&hour<22?'tide':'plum'}
  let mode='auto';try{const saved=localStorage.getItem(key);if(saved==='auto'||names[saved])mode=saved}catch{}

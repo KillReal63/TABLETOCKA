@@ -175,3 +175,15 @@ html{background:#e6eef4}html[data-theme=plum]{background:#201823}html[data-theme
 
 /* iOS standalone: paint the existing page background behind the status bar. */
 @media(max-width:699px){#focus-styles .md-top{padding-top:calc(18px + env(safe-area-inset-top, 0px));}}
+
+/* Safari samples the solid canvas color for both system safe areas.
+   A gradient shorthand otherwise resets background-color to transparent. */
+html[data-theme=glass]{--canvas-color:#e6eef4;color-scheme:light}
+html[data-theme=tide]{--canvas-color:#244777;color-scheme:dark}
+html[data-theme=plum]{--canvas-color:#554568;color-scheme:dark}
+html[data-theme=dawn]{--canvas-color:#fae9cf;color-scheme:light}
+html[data-theme=coal]{--canvas-color:#282623;color-scheme:dark}
+html[data-theme]{background-color:var(--canvas-color);background-repeat:no-repeat}
+@media(max-width:699px){
+ body{background-color:var(--canvas-color);background-image:inherit;background-repeat:no-repeat;min-height:100dvh}
+}
