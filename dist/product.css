@@ -172,3 +172,6 @@ html{background:#e6eef4}html[data-theme=plum]{background:#201823}html[data-theme
 #focus-styles .meal-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
 
 #focus-styles #schedule-hint { margin: -6px 0 20px; font-size: 13px; line-height: 1.5; }
+
+/* iOS standalone: paint the existing page background behind the status bar. */
+@media(max-width:699px){#focus-styles .md-top{padding-top:calc(18px + env(safe-area-inset-top, 0px));}}
