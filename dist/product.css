@@ -147,11 +147,11 @@ html{background:#e6eef4}html[data-theme=plum]{background:#201823}html[data-theme
 
 /* Edge-to-edge mobile canvas; keep safe-area spacing on the controls. */
 @media not all and (min-width:700px) {
-  html[data-theme=glass] { background: radial-gradient(ellipse at 110% 3%,#b9ceec 0,transparent 48%),radial-gradient(ellipse at -20% 43%,#b6d9e3 0,transparent 48%),radial-gradient(ellipse at 98% 69%,#dfc5de 0,transparent 50%),linear-gradient(150deg,#edf3f8,#e1edf4 49%,#d9e8eb); }
-  html[data-theme=plum] { background: radial-gradient(ellipse at 94% 27%,#784762 0,transparent 53%),radial-gradient(ellipse at 3% 0,#554568 0,transparent 58%),linear-gradient(165deg,#312536,#271c28 65%,#201823); }
-  html[data-theme=tide] { background: radial-gradient(ellipse at 90% 35%,#216664 0,transparent 60%),radial-gradient(ellipse at 0 0,#244777 0,transparent 59%),linear-gradient(160deg,#163754,#102c37 76%); }
-  html[data-theme=dawn] { background: radial-gradient(ellipse at 93% 10%,#f0bd96 0,transparent 56%),radial-gradient(ellipse at 4% 35%,#f5c6c3 0,transparent 54%),linear-gradient(174deg,#fae9cf,#fcf5e9 77%); }
-  html[data-theme=coal] { background: #282623; }
+  html[data-theme=glass] { --canvas-image: radial-gradient(ellipse at 110% 3%,#b9ceec 0,transparent 48%),radial-gradient(ellipse at -20% 43%,#b6d9e3 0,transparent 48%),radial-gradient(ellipse at 98% 69%,#dfc5de 0,transparent 50%),linear-gradient(150deg,#edf3f8,#e1edf4 49%,#d9e8eb); }
+  html[data-theme=plum] { --canvas-image: radial-gradient(ellipse at 94% 27%,#784762 0,transparent 53%),radial-gradient(ellipse at 3% 0,#554568 0,transparent 58%),linear-gradient(165deg,#312536,#271c28 65%,#201823); }
+  html[data-theme=tide] { --canvas-image: radial-gradient(ellipse at 90% 35%,#216664 0,transparent 60%),radial-gradient(ellipse at 0 0,#244777 0,transparent 59%),linear-gradient(160deg,#163754,#102c37 76%); }
+  html[data-theme=dawn] { --canvas-image: radial-gradient(ellipse at 93% 10%,#f0bd96 0,transparent 56%),radial-gradient(ellipse at 4% 35%,#f5c6c3 0,transparent 54%),linear-gradient(174deg,#fae9cf,#fcf5e9 77%); }
+  html[data-theme=coal] { --canvas-image: linear-gradient(#282623,#282623); }
   html { min-height: 100%; }
   body { min-height: 100dvh; background: transparent; }
   #focus-styles .md-phone.focus {
@@ -185,5 +185,17 @@ html[data-theme=dawn]{--canvas-color:#fae9cf;color-scheme:light}
 html[data-theme=coal]{--canvas-color:#282623;color-scheme:dark}
 html[data-theme]{background-color:var(--canvas-color);background-repeat:no-repeat}
 @media(max-width:699px){
- body{background-color:var(--canvas-color);background-image:inherit;background-repeat:no-repeat;min-height:100dvh}
+ html[data-theme]{background-image:none}
+ body{background:var(--canvas-color);min-height:100dvh;isolation:isolate}
+ /* The artwork stays in the viewport, so scroll position cannot expose
+    a different gradient color at the system bars. Both edges are opaque. */
+ body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-color:var(--canvas-color);
+  background-image:
+   linear-gradient(to bottom,var(--canvas-color) 0px,var(--canvas-color) calc(env(safe-area-inset-top,0px) + 24px),transparent calc(env(safe-area-inset-top,0px) + 150px)),
+   linear-gradient(to top,var(--canvas-color) 0px,var(--canvas-color) calc(env(safe-area-inset-bottom,0px) + 24px),transparent calc(env(safe-area-inset-bottom,0px) + 150px)),
+   var(--canvas-image);
+  background-repeat:no-repeat;
+ }
 }
