@@ -1,5 +1,6 @@
 """Web Push subscriptions and durable, bounded reminder delivery."""
 import base64
+from contextlib import contextmanager
 import datetime as dt
 import hashlib
 import json
@@ -17,8 +18,14 @@ from pywebpush import webpush, WebPushException
 
 DATA=Path(os.environ.get('DATA_DIR','/var/lib/vovremya'))
 ORIGIN=os.environ.get('APP_ORIGIN','https://144.31.166.231')
+@contextmanager
 def connect():
-    return sqlite3.connect(DATA/'app.sqlite3',timeout=10)
+    connection=sqlite3.connect(DATA/'app.sqlite3',timeout=10)
+    try:
+        with connection:
+            yield connection
+    finally:
+        connection.close()
 
 def initialize():
     with connect() as c:

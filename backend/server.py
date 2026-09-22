@@ -1,5 +1,6 @@
 """Single-user medication API. Python standard library + SQLite, behind Nginx."""
 import datetime as dt
+from contextlib import contextmanager
 import hashlib
 import hmac
 import json
@@ -17,10 +18,15 @@ DATA = Path(os.environ.get('DATA_DIR', '/var/lib/vovremya'))
 ORIGIN = os.environ.get('APP_ORIGIN', 'https://144.31.166.231')
 EMPTY = {'meds': [], 'taken': {}}
 
+@contextmanager
 def db():
     c = sqlite3.connect(DATA / 'app.sqlite3', timeout=10)
-    c.execute('PRAGMA busy_timeout=10000')
-    return c
+    try:
+        c.execute('PRAGMA busy_timeout=10000')
+        with c:
+            yield c
+    finally:
+        c.close()
 
 def initialize():
     DATA.mkdir(parents=True, exist_ok=True)
