@@ -37,3 +37,138 @@ html{background:#e6eef4}html[data-theme=plum]{background:#201823}html[data-theme
 #focus-styles #count{font-size:30px;line-height:1;font-weight:650;color:var(--ink)}
 #focus-styles .med{display:block}#focus-styles .med-body{display:flex;gap:14px;align-items:flex-start;width:100%}#focus-styles .med-info{flex:1;min-width:0}#focus-styles .med p b{font-weight:700;color:var(--ink)}#focus-styles .med-actions{display:flex;justify-content:space-between;margin-top:12px;gap:16px}#focus-styles .med-actions button{border:1px solid var(--line);border-radius:12px;padding:10px 16px;background:var(--soft)}
 #focus-styles .choice-row{display:flex;gap:8px;flex-wrap:wrap}#focus-styles .choice-row label{position:relative;flex:1;min-width:44px;margin:0;display:flex;justify-content:center;align-items:center;gap:5px;padding:12px 8px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:var(--soft);font-size:15px}#focus-styles .choice-row input{position:absolute;width:1px;height:1px;opacity:0;padding:0;margin:0}#focus-styles .choice-row label:has(input:checked){background:var(--button-fill);color:var(--on-action);border-color:var(--accent);font-weight:650}#focus-styles .choice-row label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:3px}#focus-styles .meal-options label{white-space:nowrap}
+
+
+/* Medication heading shares a baseline with its count. */
+#focus-styles [data-panel="meds"] > .section-head {
+  margin-top: 4px;
+  align-items: baseline;
+}
+#focus-styles [data-panel="meds"] > .section-head .view-title {
+  margin: 0;
+  line-height: 1.2;
+}
+#focus-styles [data-panel="meds"] > .section-head #count {
+  line-height: 1.2;
+}
+
+/* Floating glass navigation, tinted by the active theme. */
+#focus-styles .md-phone.focus .md-nav {
+  position: fixed;
+  width: calc(min(100%, 480px) - 28px);
+  bottom: max(12px, env(safe-area-inset-bottom));
+  margin: 0;
+  padding: 6px;
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  border-radius: 36px;
+  background: linear-gradient(135deg, #ffffff12, #ffffff03 48%, #ffffff09), color-mix(in srgb, var(--paper) 35%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.65);
+  backdrop-filter: blur(24px) saturate(1.65);
+  box-shadow: inset 0 -1px 1px #ffffff12, 0 8px 28px #101b291c;
+}
+#focus-styles .md-phone.focus .md-nav::before {
+  content: none;
+}
+#focus-styles .md-phone.focus .md-nav button {
+  min-height: 56px;
+  min-width: 0;
+  padding: 7px 4px;
+  gap: 3px;
+  border-radius: 28px;
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+}
+#focus-styles .md-phone.focus .md-nav button.active {
+  color: var(--accent);
+  background: linear-gradient(135deg, #ffffff26, #ffffff06), color-mix(in srgb, var(--accent) 10%, transparent);
+  box-shadow: inset 0 1px 1px #ffffff70, inset 0 -1px 1px #ffffff16, 0 2px 6px #101b2910;
+}
+@media(min-width:700px) {
+  #focus-styles .md-phone.focus .md-nav { bottom: 35px; }
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  #focus-styles .md-phone.focus .md-nav { background: var(--paper); }
+}
+@media(prefers-reduced-transparency:reduce) {
+  #focus-styles .md-phone.focus .md-nav {
+    background: var(--paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+
+/* Each intake owns one aligned time segment and centered symbol. */
+#focus-styles #summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+  gap: 12px 5px;
+  margin-top: 16px;
+}
+#focus-styles #summary:has(.progress-item:only-child) { grid-template-columns: 1fr; }
+#focus-styles #summary .progress-item {
+  min-width: 0;
+  min-height: 74px;
+  gap: 10px;
+  padding: 0 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  justify-content: flex-start;
+}
+#focus-styles #summary .progress-time {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 24px;
+  border-radius: 5px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.4;
+}
+#focus-styles #summary .is-done .progress-time {
+  background: var(--accent);
+  color: var(--paper);
+}
+#focus-styles #summary .progress-symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 38px;
+}
+#focus-styles #summary .is-done .category-art,
+#focus-styles #summary .is-done .category-icon { opacity: .5; }
+#focus-styles #summary .progress-check { top: -3px; right: -2px; }
+
+
+/* Edge-to-edge mobile canvas; keep safe-area spacing on the controls. */
+@media not all and (min-width:700px) {
+  html[data-theme=glass] { background: radial-gradient(ellipse at 110% 3%,#b9ceec 0,transparent 48%),radial-gradient(ellipse at -20% 43%,#b6d9e3 0,transparent 48%),radial-gradient(ellipse at 98% 69%,#dfc5de 0,transparent 50%),linear-gradient(150deg,#edf3f8,#e1edf4 49%,#d9e8eb); }
+  html[data-theme=plum] { background: radial-gradient(ellipse at 94% 27%,#784762 0,transparent 53%),radial-gradient(ellipse at 3% 0,#554568 0,transparent 58%),linear-gradient(165deg,#312536,#271c28 65%,#201823); }
+  html[data-theme=tide] { background: radial-gradient(ellipse at 90% 35%,#216664 0,transparent 60%),radial-gradient(ellipse at 0 0,#244777 0,transparent 59%),linear-gradient(160deg,#163754,#102c37 76%); }
+  html[data-theme=dawn] { background: radial-gradient(ellipse at 93% 10%,#f0bd96 0,transparent 56%),radial-gradient(ellipse at 4% 35%,#f5c6c3 0,transparent 54%),linear-gradient(174deg,#fae9cf,#fcf5e9 77%); }
+  html[data-theme=coal] { background: #282623; }
+  html { min-height: 100%; }
+  body { min-height: 100dvh; background: transparent; }
+  #focus-styles .md-phone.focus {
+    max-width: none;
+    min-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+}
+
+
+/* Focus the dialog heading without opening the mobile keyboard. */
+#focus-styles #editor .section-head { margin-top: 0; }
+#focus-styles #form-title:focus { outline: none; }
+
+#focus-styles .meal-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+#focus-styles #schedule-hint { margin: -6px 0 20px; font-size: 13px; line-height: 1.5; }

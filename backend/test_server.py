@@ -56,12 +56,12 @@ class Integration(unittest.TestCase):
                 self.assertEqual(request('state')[1]['state'],data)
                 for category in ['pill','ointment','supplement','action']:
                     data['meds'][0]['category']=category
-                    data['meds'][0]['dose']='' if category=='action' else '1'
+                    data['meds'][0]['dose']='' if category in ('action','ointment') else '1'
                     version=request('state')[1]['version']
                     self.assertEqual(request('state',{'state':data,'version':version})[0],200)
                     self.assertEqual(request('state')[1]['state'],data)
                 data['meds'][0].pop('cycle')
-                data['meds'][0].update(meal='before',durationDays=3,end='2026-09-19')
+                data['meds'][0].update(meal='fasting',durationDays=3,end='2026-09-19')
                 self.assertEqual(request('state',{'state':data,'version':request('state')[1]['version']})[0],200)
                 self.assertEqual(request('state')[1]['state'],data)
                 for fields in [{'meal':'bad'},{'durationDays':0},{'durationDays':True},{'end':'2026-09-20'},{'days':[1]}]:
