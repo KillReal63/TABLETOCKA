@@ -199,3 +199,24 @@ html[data-theme]{background-color:var(--canvas-color);background-repeat:no-repea
   background-repeat:no-repeat;
  }
 }
+
+
+/* Keep schedule text readable instead of squeezing it between controls. */
+#focus-styles .dose { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:8px 12px; }
+#focus-styles .dose .time { grid-column:1; grid-row:1; padding-top:3px; white-space:nowrap; }
+#focus-styles .dose .dose-info { grid-column:2; min-width:0; }
+#focus-styles .dose > button { grid-column:2; justify-self:start; }
+#focus-styles #history-list .dose { grid-template-columns:minmax(0,1fr); }
+#focus-styles #history-list .dose .dose-info,
+#focus-styles #history-list .dose > button { grid-column:1; }
+#focus-styles .md-focus-next { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; }
+#focus-styles .md-focus-next > div { min-width:0; }
+#focus-styles .md-focus-next > div:last-child { text-align:right; white-space:nowrap; }
+#focus-styles .md-focus-next > div:first-child { overflow-wrap:anywhere; }
+#focus-styles input, #focus-styles select { font-size:16px; min-width:0; }
+#focus-styles #times-hint { display:block; margin-top:4px; line-height:1.45; }
+#focus-styles #dose-options { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); }
+#focus-styles #dose-options label { min-width:0; padding:12px 4px; overflow-wrap:anywhere; }
+#focus-styles #dose-options label:nth-child(n+6) { grid-column:1 / -1; }
+#focus-styles .theme-choice input { flex-shrink:0; }
+#focus-styles .theme-choice > span:last-child { min-width:0; }
