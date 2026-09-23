@@ -226,3 +226,9 @@ html[data-theme]{background-color:var(--canvas-color);background-repeat:no-repea
 #focus-styles #form > .dates { grid-template-columns:minmax(0,1fr); }
 #focus-styles input[type=date] { box-sizing:border-box; max-width:100%; }
 #focus-styles input[type=date]::-webkit-date-and-time-value { text-align:left; min-width:0; }
+
+
+#focus-styles #form textarea { display:block; box-sizing:border-box; width:100%; min-width:0; margin-top:6px; padding:12px; font:inherit; font-size:16px; line-height:1.5; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:12px; resize:vertical; }
+#focus-styles #form input[type=date] { display:block; width:100%; height:50px; min-height:50px; max-height:50px; line-height:24px; -webkit-appearance:none; appearance:none; }
+#focus-styles #form > .dates { align-items:start; }
+#focus-styles .med-note { white-space:pre-wrap; }
