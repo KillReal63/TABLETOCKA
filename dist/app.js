@@ -44,25 +44,16 @@ function openEditor(id){
  $('#dose-options').innerHTML=choices.map(value=>`<label><input type="radio" name="dose" value="${esc(value)}" ${value===dose?'checked':''}>${esc(value||'Без дозировки')}</label>`).join('');
  f.elements.meal.value=m?.meal||'any';f.elements.start.value=m?.start||today();f.elements.times.value=m?.times.join(', ')||'09:00';
  $('#week').innerHTML=[1,2,3,4,5,6,0].map(d=>`<label><input type="checkbox" value="${d}" ${(m?m.days.includes(d):true)?'checked':''}>${weekdays[d]}</label>`).join('');
- f.elements.scheduleMode.value=m?.durationDays?'duration':m?.cycle?'cycle':m&&!m.end&&m.days.length===7?'daily':'weekly';f.elements.durationDays.value=m?.durationDays||7;f.elements.cycleOn.value=m?.cycle?.on||1;f.elements.cycleOff.value=m?.cycle?.off||1;f.elements.category.value=m?.category||'pill';updateCategory();updateScheduleMode();$('#editor').showModal();
+ f.elements.scheduleMode.value=!m?'daily':m.durationDays?'duration':m.cycle?'cycle':!m.end&&m.days.length===7?'daily':'weekly';f.elements.durationDays.value=m?.durationDays||7;f.elements.cycleOn.value=m?.cycle?.on||1;f.elements.cycleOff.value=m?.cycle?.off||1;f.elements.category.value=m?.category||'pill';updateCategory();updateScheduleMode();$('#editor').showModal();
 }
 function updateCategory(){const f=$('#form'),ointment=f.elements.category.value==='ointment';f.elements.name.placeholder=f.elements.category.value==='action'?'Например, измерить давление':'Название из назначения';for(const id of ['dose-fields','meal-fields']){$('#'+id).hidden=ointment;$('#'+id).disabled=ointment}}
 $('#form').elements.category.onchange=updateCategory;
 
 // Multiple 24-hour times: 09001430 -> 09:00, 14:30.
 const timeInput=$('#form').elements.times;
-timeInput.addEventListener('beforeinput',event=>{
- if(timeInput.selectionStart!==timeInput.selectionEnd)return;
- const position=timeInput.selectionStart,value=timeInput.value;
- if(event.inputType==='deleteContentBackward'&&position>0&&/[^0-9]/.test(value[position-1])){
-  let start=position-1;while(start>0&&/[^0-9]/.test(value[start]))start--;
-  timeInput.setSelectionRange(start,position);
- }else if(event.inputType==='deleteContentForward'&&position<value.length&&/[^0-9]/.test(value[position])){
-  let end=position;while(end<value.length&&/[^0-9]/.test(value[end]))end++;
-  timeInput.setSelectionRange(position,Math.min(end+1,value.length));
- }
-});
-timeInput.addEventListener('input',()=>{
+// Let native deletion remove separators too; only mask newly entered text.
+timeInput.addEventListener('input',event=>{
+ if(event.inputType?.startsWith('delete'))return;
  const before=timeInput.value.slice(0,timeInput.selectionStart).replace(/\D/g,'').length;
  const digits=timeInput.value.replace(/\D/g,'').slice(0,192);
  const groups=digits.match(/.{1,4}/g)||[];
