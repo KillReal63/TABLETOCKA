@@ -65,7 +65,7 @@ def validate_state(value):
             raise ValueError('Некорректное лекарство')
         if 'meal' in m and (not isinstance(m['meal'], str) or m['meal'] not in ('before','after','any','fasting')):
             raise ValueError('Некорректное отношение к еде')
-        if 'category' in m and (not isinstance(m['category'], str) or m['category'] not in ('pill','ointment','supplement','action')):
+        if 'category' in m and (not isinstance(m['category'], str) or m['category'] not in ('pill','ointment','supplement','action','spray','drops','injection')):
             raise ValueError('Некорректная категория')
         if 'cycle' in m:
             cycle = m['cycle']
@@ -90,7 +90,7 @@ def validate_state(value):
             if m['end']<m['start']: raise ValueError('Конец курса раньше начала')
         if not isinstance(m['days'],list) or not 1<=len(m['days'])<=7 or any(type(d)!=int or not 0<=d<=6 for d in m['days']) or len(set(m['days']))!=len(m['days']):
             raise ValueError('Некорректные дни недели')
-        if not isinstance(m['times'],list) or not 1<=len(m['times'])<=48 or any(not isinstance(t,str) or not re.fullmatch(r'([01]\d|2[0-3]):[0-5]\d',t) for t in m['times']) or len(set(m['times']))!=len(m['times']):
+        if not isinstance(m['times'],list) or not 0<=len(m['times'])<=48 or any(not isinstance(t,str) or not re.fullmatch(r'([01]\d|2[0-3]):[0-5]\d',t) for t in m['times']) or len(set(m['times']))!=len(m['times']):
             raise ValueError('Некорректное время')
     for key, stamp in taken.items():
         if not isinstance(key,str) or not re.fullmatch(r'\d{4}-\d{2}-\d{2}\|[a-zA-Z0-9-]{1,80}\|([01]\d|2[0-3]):[0-5]\d',key):

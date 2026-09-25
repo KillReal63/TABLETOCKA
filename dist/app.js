@@ -3,21 +3,25 @@ const KEY='vovremya-v1';
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 let state={meds:[],taken:{},notified:{}},version=0,authenticated=false,busy=false,lastSaved={meds:[],taken:{}};
 let editing=null,toastTimer;
-const categories={pill:'Таблетка',ointment:'Мазь',supplement:'БАД',action:'Действие'};
+const categories={pill:'Таблетка',ointment:'Мазь',supplement:'БАД',spray:'Спрей',drops:'Капли',injection:'Инъекция',action:'Действие'};
 const categoryLabel=m=>categories[m.category||'pill'];
-const categoryShapes={
- pill:'<circle cx="32" cy="32" r="21"/><path d="M17 47 47 17"/>',
- ointment:'<path d="m19 10 26 0-4 36H23Z"/><path d="M19 16h26M24 46h16v9H24Z"/><path d="M27 30h10M32 25v10"/>',
- supplement:'<rect x="24" y="6" width="16" height="9" rx="2"/><rect x="18" y="15" width="28" height="42" rx="9"/><path d="M19 26h26M19 47h26M27 40c0-7 5-10 11-10 0 7-4 11-11 10ZM27 40l7-6"/>',
- action:'<rect x="14" y="10" width="36" height="46" rx="7"/><path d="M25 10V7h14v3M23 32l6 6 13-14M24 46h16"/>'
+const iconForms={
+ pill:['M9 4a5 5 0 0 1 7 7l-5 5a5 5 0 0 1-7-7Z','m6.5 6.5 7 7'],
+ ointment:['M6 3h12l-2 14H8ZM9 17h6v4H9Z','M7 6h10M9 11h6'],
+ supplement:['M8 3h8v4H8ZM7 7h10l1 3v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-9Z','M7 11h10M10 17c0-3 2-4 5-4 0 3-2 5-5 4Z'],
+ spray:['M8 10h8l2 3v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6ZM10 10V6h4v4M10 3h8v3h-8Z','M8 15h8M20 4h1'],
+ drops:['M10 3h4v6l4 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-5l4-5Z','M10 7h4M12 12s-2 3-2 4a2 2 0 0 0 4 0c0-1-2-4-2-4Z'],
+ injection:['m8 14 7-7 5 5-7 7Zm-2-2 9 9M17 3l5 5M19 5l-3 3M21 7l-3 3M9 17l-6 6','M12 10l2 2M10 12l2 2'],
+ action:['M6 4h12v17H6Z','M9 3h6v3H9Zm0 10 2 2 4-5']
 };
+let iconSerial=0;
 function categoryIcon(m){
- const category=m?.category||'pill';
- if(category==='pill')return '<span class="category-art art-pill" aria-hidden="true"><span class="md-pill gold"></span></span>';
- if(category==='ointment')return '<span class="category-art art-ointment" aria-hidden="true"><span class="ointment-tube"><span class="tube-band">+</span></span><span class="tube-cap"></span></span>';
- if(category==='action')return '<span class="category-art art-action" aria-hidden="true"><span class="action-sheet"><svg viewBox="0 0 40 40" fill="none"><path d="m10 20 7 7 14-15" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sheet-line"></span></span></span>';
- return `<svg class="category-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${categoryShapes.supplement}</svg>`;
+ const [body,detail]=iconForms[m?.category]||iconForms.pill,id='med-icon-'+(++iconSerial);
+ return `<svg class="category-icon unified-icon" viewBox="0 0 24 24" aria-hidden="true" style="--icon-glass:url(#${id})"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".95"/><stop offset=".45" stop-color="currentColor" stop-opacity=".55"/><stop offset="1" stop-color="currentColor"/></linearGradient></defs><path class="icon-body" d="${body}"/><path class="icon-detail" d="${detail}"/></svg>`;
 }
+const iconStyleKey='vovremya-icon-style',iconStyles=['line','solid','glass'];
+let iconStyle='glass';try{const saved=localStorage.getItem(iconStyleKey);if(iconStyles.includes(saved))iconStyle=saved}catch{}
+document.documentElement.dataset.icons=iconStyle;
 const completedLabel=m=>m.category==='action'?'Выполнено':m.category==='ointment'?'Нанесено':'Принято';
 const mealLabels={before:'До еды',after:'После еды',any:'Неважно',fasting:'Натощак'};
 const details=m=>[categoryLabel(m),m.category!=='ointment'&&m.dose,m.category!=='ointment'&&m.meal&&mealLabels[m.meal],m.note].filter(Boolean).map(esc).join(' · ');
@@ -34,7 +38,7 @@ function render(){const date=$('#day').value||today(),items=entries(date),todays
  const now=new Date().toTimeString().slice(0,5),next=todays.find(x=>!state.taken[x.key]&&x.time>=now);
  $('#next').textContent=next?`${next.time} · ${next.med.name}`:todays.some(x=>!state.taken[x.key])?'Есть неотмеченные приёмы':todays.length?'Всё на сегодня отмечено':'Добавь своё первое лекарство';
  $('#schedule').innerHTML=items.length?items.map(x=>{const taken=state.taken[x.key],past=date<today()||(date===today()&&x.time<now);return `<article class="dose ${taken?'done':''}"><div class="time">${x.time}</div><div class="dose-info"><h3>${categoryIcon(x.med)}${esc(x.med.name)}</h3><p>${details(x.med)}</p><p class="status">${taken?'✓ '+completedLabel(x.med):past?'Время прошло · не отмечено':'По расписанию'}</p></div>${date<=today()?`<button class="${taken?'secondary':''}" data-take="${esc(x.key)}" aria-label="${taken?'Отменить отметку':'Отметить приём'} ${esc(x.med.name)} в ${x.time}">${taken?'Отменить':completedLabel(x.med)}</button>`:''}</article>`}).join(''):`<div class="empty"><h3>${state.meds.length?'Свободный день':'Начнём с первого лекарства'}</h3><p>${state.meds.length?'На эту дату приёмов нет.':'Добавь название, дозировку и время — здесь появится твоё расписание.'}</p></div>`;
- $('#count').textContent=String(state.meds.length);$('#meds').innerHTML=state.meds.length?state.meds.map(m=>`<article class="med"><div class="med-body">${categoryIcon(m)}<div class="med-info"><strong>${esc(m.name)}</strong><p><b>${esc(categoryLabel(m))}</b>${m.category!=='ointment'&&m.dose?' · '+esc(m.dose):''} · <b>${m.times.join(', ')}</b> · ${m.durationDays?`${m.durationDays} дн.`:m.cycle?`${m.cycle.on} дн. приёма / ${m.cycle.off} дн. перерыва`:m.days.length===7?'Ежедневно':m.days.map(d=>weekdays[d]).join(', ')}</p><p>С ${esc(m.start)}${m.end?' до '+esc(m.end):' · без даты окончания'}${m.category!=='ointment'&&m.meal?' · '+mealLabels[m.meal]:''}</p>${m.category==='ointment'&&m.note?`<p class="med-note">${esc(m.note)}</p>`:''}</div></div><div class="med-actions"><button class="icon" data-edit="${m.id}" aria-label="Изменить ${esc(m.name)}">Изменить</button><button class="icon danger" data-delete="${m.id}" aria-label="Удалить ${esc(m.name)}">Удалить</button></div></article>`).join(''):'<p class="small">Здесь будут сохранённые лекарства.</p>';
+ $('#count').textContent=String(state.meds.length);$('#meds').innerHTML=state.meds.length?state.meds.map(m=>`<article class="med"><div class="med-body">${categoryIcon(m)}<div class="med-info"><strong>${esc(m.name)}</strong><p><b>${esc(categoryLabel(m))}</b>${m.category!=='ointment'&&m.dose?' · '+esc(m.dose):''} · <b>${m.times.length?m.times.join(', '):'Без времени'}</b> · ${m.durationDays?`${m.durationDays} дн.`:m.cycle?`${m.cycle.on} дн. приёма / ${m.cycle.off} дн. перерыва`:m.days.length===7?'Ежедневно':m.days.map(d=>weekdays[d]).join(', ')}</p><p>С ${esc(m.start)}${m.end?' до '+esc(m.end):' · без даты окончания'}${m.category!=='ointment'&&m.meal?' · '+mealLabels[m.meal]:''}</p>${m.category==='ointment'&&m.note?`<p class="med-note">${esc(m.note)}</p>`:''}</div></div><div class="med-actions"><button class="icon" data-edit="${m.id}" aria-label="Изменить ${esc(m.name)}">Изменить</button><button class="icon danger" data-delete="${m.id}" aria-label="Удалить ${esc(m.name)}">Удалить</button></div></article>`).join(''):'<p class="small">Здесь будут сохранённые лекарства.</p>';
 }
 function openEditor(id){
  editing=id||null;const m=state.meds.find(x=>x.id===id),f=$('#form');f.reset();
@@ -43,15 +47,26 @@ function openEditor(id){
  if(m?.category==='action')f.elements.category.add(new Option('Действие (ранее созданное)','action'));
  $('#form-error').textContent='';$('#form-title').textContent=m?'Изменить запись':'Новая запись';
  f.elements.ointmentNote.value=m?.note||'';
+ f.elements.customDose.value=['spray','drops','injection'].includes(m?.category)?m.dose:'';
  for(const key of ['name','end'])f.elements[key].value=m?.[key]||'';
  const choices=['1/4','1/2','1','2','3'],dose=m?m.dose:'1';
  if(!choices.includes(dose))choices.push(dose);
  $('#dose-options').innerHTML=choices.map(value=>`<label><input type="radio" name="dose" value="${esc(value)}" ${value===dose?'checked':''}>${esc(value||'Без дозировки')}</label>`).join('');
- f.elements.meal.value=m?.meal||'any';f.elements.start.value=m?.start||today();f.elements.times.value=m?.times.join(', ')||'09:00';
+ f.elements.meal.value=m?.meal||'any';f.elements.start.value=m?.start||today();f.elements.times.value=m?.times.join(', ')||'';
  $('#week').innerHTML=[1,2,3,4,5,6,0].map(d=>`<label><input type="checkbox" value="${d}" ${(m?m.days.includes(d):true)?'checked':''}>${weekdays[d]}</label>`).join('');
  f.elements.scheduleMode.value=!m?'daily':m.durationDays?'duration':m.cycle?'cycle':!m.end&&m.days.length===7?'daily':'weekly';f.elements.durationDays.value=m?.durationDays||7;f.elements.cycleOn.value=m?.cycle?.on||1;f.elements.cycleOff.value=m?.cycle?.off||1;f.elements.category.value=m?.category||'pill';updateCategory();updateScheduleMode();$('#editor').showModal();
 }
-function updateCategory(){const f=$('#form'),ointment=f.elements.category.value==='ointment';$('#ointment-note-field').hidden=!ointment;f.elements.ointmentNote.disabled=!ointment;f.elements.name.placeholder=f.elements.category.value==='action'?'Например, измерить давление':'Название из назначения';for(const id of ['dose-fields','meal-fields']){$('#'+id).hidden=ointment;$('#'+id).disabled=ointment}}
+function updateCategory(){
+ const f=$('#form'),category=f.elements.category.value,ointment=category==='ointment',custom=['spray','drops','injection'].includes(category);
+ $('#ointment-note-field').hidden=!ointment;f.elements.ointmentNote.disabled=!ointment;
+ $('#custom-dose-field').hidden=!custom;f.elements.customDose.disabled=!custom;
+ const doseLabels={spray:['Количество впрыскиваний','Например, 1 впрыскивание в каждую ноздрю'],drops:['Количество капель','Например, 2 капли'],injection:['Дозировка по назначению','Укажи дозу и единицу из назначения']};
+ if(custom){$('#custom-dose-label').textContent=doseLabels[category][0];f.elements.customDose.placeholder=doseLabels[category][1]}
+ f.elements.name.placeholder=category==='action'?'Например, измерить давление':'Название из назначения';
+ $('#dose-fields').hidden=ointment||custom;$('#dose-fields').disabled=ointment||custom;
+ const hideMeal=['ointment','spray','injection'].includes(category);
+ $('#meal-fields').hidden=hideMeal;$('#meal-fields').disabled=hideMeal;
+}
 $('#form').elements.category.onchange=updateCategory;
 
 // Multiple 24-hour times: 09001430 -> 09:00, 14:30.
@@ -90,15 +105,23 @@ function updateScheduleHint(){
   const on=Number(f.elements.cycleOn.value),off=Number(f.elements.cycleOff.value);
   text='Дни приёма + дни перерыва = полный цикл.';
   if([on,off].every(n=>Number.isInteger(n)&&n>=1&&n<=365))text=`Цикл: ${on} дн. приёма + ${off} дн. перерыва = ${on+off} дн. Затем повторяется.`;
- }else if(mode==='daily')text='Ежедневно в указанное время, без даты окончания.';
+ }else if(mode==='daily')text='Ежедневно, без даты окончания.';
  hint.textContent=text;hint.hidden=!text;
 }
 for(const name of ['durationDays','cycleOn','cycleOff','start'])$('#form').elements[name].addEventListener('input',updateScheduleHint);
 
 $('#add').onclick=()=>openEditor();$('#close').onclick=()=>$('#editor').close();$('#day').value=today();$('#day').onchange=render;
-$('#form').onsubmit=async e=>{e.preventDefault();if(busy||!authenticated)return;const f=e.target,isCycle=f.elements.scheduleMode.value==='cycle',days=f.elements.scheduleMode.value!=='weekly'?[0,1,2,3,4,5,6]:[...$('#week').querySelectorAll('input:checked')].map(x=>Number(x.value));const name=f.elements.name.value.trim(),dose=f.elements.category.value==='ointment'?'':f.elements.dose.value.trim(),start=f.elements.start.value;let end=f.elements.scheduleMode.value==='daily'?'':f.elements.end.value;const durationDays=Number(f.elements.durationDays.value);if(f.elements.scheduleMode.value==='duration'){if(!Number.isInteger(durationDays)||durationDays<1||durationDays>3650){$('#form-error').textContent='Укажи от 1 до 3650 дней.';return}end=courseEnd(start,durationDays)}if(!name||(!dose&&!['action','ointment'].includes(f.elements.category.value))||!days.length||(end&&end<start)){$('#form-error').textContent='Укажи название, дозировку, хотя бы один день и корректные даты курса.';return}const med={id:editing||crypto.randomUUID(),name,dose,category:f.elements.category.value,start,end,days,times:[...new Set(f.elements.times.value.split(',').map(x=>x.trim()))].sort(),...(f.elements.category.value==='ointment'?{}:{meal:f.elements.meal.value}),note:f.elements.category.value==='ointment'?f.elements.ointmentNote.value.trim():state.meds.find(m=>m.id===editing)?.note||''};if(f.elements.scheduleMode.value==='duration')med.durationDays=durationDays;if(isCycle){const on=Number(f.elements.cycleOn.value),off=Number(f.elements.cycleOff.value);if(![on,off].every(n=>Number.isInteger(n)&&n>=1&&n<=365)){$('#form-error').textContent='Укажи дни приёма и перерыва: целые числа от 1 до 365.';return}med.cycle={on,off}}if(editing)state.meds=state.meds.map(m=>m.id===editing?med:m);else state.meds.push(med);const saved=await save();if(saved){$('#editor').close();toast('Сохранено на сервере')}};
+$('#form').onsubmit=async e=>{e.preventDefault();if(busy||!authenticated)return;const f=e.target,isCycle=f.elements.scheduleMode.value==='cycle',days=f.elements.scheduleMode.value!=='weekly'?[0,1,2,3,4,5,6]:[...$('#week').querySelectorAll('input:checked')].map(x=>Number(x.value));const name=f.elements.name.value.trim(),dose=f.elements.category.value==='ointment'?'':['spray','drops','injection'].includes(f.elements.category.value)?f.elements.customDose.value.trim():f.elements.dose.value.trim(),start=f.elements.start.value;let end=f.elements.scheduleMode.value==='daily'?'':f.elements.end.value;const durationDays=Number(f.elements.durationDays.value);if(f.elements.scheduleMode.value==='duration'){if(!Number.isInteger(durationDays)||durationDays<1||durationDays>3650){$('#form-error').textContent='Укажи от 1 до 3650 дней.';return}end=courseEnd(start,durationDays)}if(!name||(!dose&&!['action','ointment'].includes(f.elements.category.value))||!days.length||(end&&end<start)){$('#form-error').textContent='Укажи название, дозировку, хотя бы один день и корректные даты курса.';return}const med={id:editing||crypto.randomUUID(),name,dose,category:f.elements.category.value,start,end,days,times:[...new Set(f.elements.times.value.split(',').map(x=>x.trim()).filter(Boolean))].sort(),...(['ointment','spray','injection'].includes(f.elements.category.value)?{}:{meal:f.elements.meal.value}),note:f.elements.category.value==='ointment'?f.elements.ointmentNote.value.trim():state.meds.find(m=>m.id===editing)?.note||''};if(f.elements.scheduleMode.value==='duration')med.durationDays=durationDays;if(isCycle){const on=Number(f.elements.cycleOn.value),off=Number(f.elements.cycleOff.value);if(![on,off].every(n=>Number.isInteger(n)&&n>=1&&n<=365)){$('#form-error').textContent='Укажи дни приёма и перерыва: целые числа от 1 до 365.';return}med.cycle={on,off}}if(editing)state.meds=state.meds.map(m=>m.id===editing?med:m);else state.meds.push(med);const saved=await save();if(saved){$('#editor').close();toast('Сохранено на сервере')}};
 document.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b||busy||!authenticated)return;if(b.dataset.take){const key=b.dataset.take;if(state.taken[key])delete state.taken[key];else state.taken[key]=new Date().toISOString();await save();render()}if(b.dataset.edit)openEditor(b.dataset.edit);if(b.dataset.delete&&confirm('Удалить лекарство из расписания?')){state.meds=state.meds.filter(m=>m.id!==b.dataset.delete);await save();render()}});
 $('#notifications').onclick=async()=>{if(!('Notification'in window)){toast('Этот браузер не поддерживает уведомления. Напоминания на странице доступны.');return}try{const result=await Notification.requestPermission();$('#notification-status').textContent=result==='granted'?'Уведомления включены для открытой страницы. В фоне возможны задержки; после закрытия сайта они не приходят.':'Уведомления не разрешены. Можно включить их в настройках браузера; напоминания на странице работают.'}catch{toast('Уведомления недоступны. Напоминания на странице продолжают работать.')}};
 function tick(){if(!authenticated||window.pushEnabled)return;render();const now=new Date(),minute=now.toTimeString().slice(0,5);for(const x of entries(today())){if(x.time!==minute||state.taken[x.key]||state.notified[x.key])continue;state.notified[x.key]=true;toast(`Время приёма: ${x.med.name} · ${x.med.dose}`);if('Notification'in window&&Notification.permission==='granted'){try{new Notification('Время приёма',{body:`${x.med.name} · ${x.med.dose}`,tag:x.key})}catch{}}}}
 $('#zone').textContent=Intl.DateTimeFormat().resolvedOptions().timeZone;render();setInterval(tick,15000);
 if(document.modelContext?.registerTool){try{Promise.resolve(document.modelContext.registerTool({name:'read_medication_schedule',description:'Read medication schedule for a local calendar date.',inputSchema:{type:'object',properties:{date:{type:'string',pattern:'^\\d{4}-\\d{2}-\\d{2}$'}},required:['date'],additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:true},execute:({date})=>{if(!authenticated)throw Error('Login required');if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||Number.isNaN(new Date(date+'T12:00:00').valueOf()))throw Error('Invalid date');return entries(date).map(x=>({name:x.med.name,dose:x.med.dose,time:x.time,taken:!!state.taken[x.key]}))}})).catch(()=>{})}catch{}}
+
+// Appearance is local to this device, independent of medication data.
+const iconOptions=$('#icon-options');
+iconOptions.querySelectorAll('[data-icon-preview]').forEach(el=>{el.innerHTML=['pill','ointment','supplement','spray','drops','injection'].map(category=>categoryIcon({category})).join('')});
+function syncIconOptions(){iconOptions.querySelectorAll('input').forEach(el=>el.checked=el.value===iconStyle)}
+syncIconOptions();
+iconOptions.addEventListener('change',event=>{if(event.target.name!=='iconStyle'||!iconStyles.includes(event.target.value))return;iconStyle=event.target.value;document.documentElement.dataset.icons=iconStyle;try{localStorage.setItem(iconStyleKey,iconStyle)}catch{toast('Стиль применён, но браузер не смог его запомнить')}syncIconOptions()});
+window.addEventListener('storage',event=>{if(event.key!==iconStyleKey)return;iconStyle=iconStyles.includes(event.newValue)?event.newValue:'glass';document.documentElement.dataset.icons=iconStyle;syncIconOptions()});
