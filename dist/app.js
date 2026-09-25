@@ -37,7 +37,11 @@ function render(){const date=$('#day').value||today(),items=entries(date),todays
  $('#count').textContent=String(state.meds.length);$('#meds').innerHTML=state.meds.length?state.meds.map(m=>`<article class="med"><div class="med-body">${categoryIcon(m)}<div class="med-info"><strong>${esc(m.name)}</strong><p><b>${esc(categoryLabel(m))}</b>${m.category!=='ointment'&&m.dose?' · '+esc(m.dose):''} · <b>${m.times.join(', ')}</b> · ${m.durationDays?`${m.durationDays} дн.`:m.cycle?`${m.cycle.on} дн. приёма / ${m.cycle.off} дн. перерыва`:m.days.length===7?'Ежедневно':m.days.map(d=>weekdays[d]).join(', ')}</p><p>С ${esc(m.start)}${m.end?' до '+esc(m.end):' · без даты окончания'}${m.category!=='ointment'&&m.meal?' · '+mealLabels[m.meal]:''}</p>${m.category==='ointment'&&m.note?`<p class="med-note">${esc(m.note)}</p>`:''}</div></div><div class="med-actions"><button class="icon" data-edit="${m.id}" aria-label="Изменить ${esc(m.name)}">Изменить</button><button class="icon danger" data-delete="${m.id}" aria-label="Удалить ${esc(m.name)}">Удалить</button></div></article>`).join(''):'<p class="small">Здесь будут сохранённые лекарства.</p>';
 }
 function openEditor(id){
- editing=id||null;const m=state.meds.find(x=>x.id===id),f=$('#form');f.reset();$('#form-error').textContent='';$('#form-title').textContent=m?'Изменить запись':'Новая запись';
+ editing=id||null;const m=state.meds.find(x=>x.id===id),f=$('#form');f.reset();
+ // Keep existing actions editable without offering them for new entries.
+ f.elements.category.querySelector('option[value=action]')?.remove();
+ if(m?.category==='action')f.elements.category.add(new Option('Действие (ранее созданное)','action'));
+ $('#form-error').textContent='';$('#form-title').textContent=m?'Изменить запись':'Новая запись';
  f.elements.ointmentNote.value=m?.note||'';
  for(const key of ['name','end'])f.elements[key].value=m?.[key]||'';
  const choices=['1/4','1/2','1','2','3'],dose=m?m.dose:'1';
